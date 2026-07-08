@@ -35,7 +35,7 @@ def next_question():
 # Hàm xử lý khi bấm "Làm lại từ đầu"
 def reset_quiz():
     shuffled = data.copy()
-    random.shuffle(shuffled)
+    # random.shuffle(shuffled)
     st.session_state.shuffled_questions = shuffled
     st.session_state.current_index = 0
     st.session_state.score = 0
