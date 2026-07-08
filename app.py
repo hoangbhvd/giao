@@ -3,7 +3,7 @@ import pandas as pd
 import random
 
 # Tối ưu giao diện trực quan
-st.set_page_config(page_title="Trắc nghiệm Tiếng Anh", page_icon="🎯", layout="centered")
+st.set_page_config(page_title="Trắc nghiệm Lòng Yêu Nước", page_icon="🎯", layout="centered")
 
 # 1. Đọc dữ liệu từ file Excel và đánh dấu số câu gốc
 @st.cache_data
@@ -49,7 +49,7 @@ if 'shuffled_questions' not in st.session_state and len(data) > 0:
     reset_quiz()
 
 # --- GIAO DIỆN CHÍNH ---
-st.title("🎯 Ứng Dụng Trắc Nghiệm Tiếng Anh")
+st.title("🎯 Ứng Dụng Trắc Nghiệm Lòng Yêu Nước")
 
 if len(data) == 0:
     st.warning("Dữ liệu câu hỏi trống. Vui lòng kiểm tra lại file Excel.")
@@ -62,8 +62,8 @@ else:
         
         # HIỂN THỊ CẢ LƯỢT CHƠI VÀ SỐ CÂU THỰC TẾ TRONG FILE EXCEL
         # Ví dụ: Lượt làm câu: 1/50 | (Câu gốc trong file Excel: Số 42)
-        st.write(f"### 📝 Tiến trình: {current_idx + 1} / {len(questions)}")
-        st.caption(f"🔍 **Câu hỏi gốc trong dữ liệu Excel: Số {item['index_goc']}**")
+        st.write(f"### 📝 Câu hỏi: {current_idx + 1} / {len(questions)}")
+        st.caption(f"🔍 **Câu hỏi gốc: Số {item['index_goc']}**")
         
         # Phần hiển thị nội dung câu hỏi
         st.info(item['Câu hỏi'])
