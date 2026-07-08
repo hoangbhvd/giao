@@ -1,78 +1,59 @@
 import streamlit as st
 import pandas as pd
+import random
 
-# Cấu hình trang web app
-st.set_page_config(page_title="App Luyện Thi Trắc Nghiệm", page_icon="📝", layout="centered")
-
-# 1. Đọc dữ liệu từ file Excel hoàn chỉnh của bạn
-@st.cache_data # Dùng cache để app load mượt và nhanh hơn
+# 1. Đọc dữ liệu từ file Excel (thay tên file của bạn vào đây)
+@st.cache_data
 def load_data():
-    df = pd.read_excel("ngan_hang_cau_hoi_hoan_thinh.xlsx")
-    # Đảm bảo các cột trống hoặc NaN không làm app bị lỗi
-    df = df.fillna("")
-    return df
+    # Giả sử file của bạn có cột 'Câu hỏi', 'A', 'B', 'C', 'D', 'Đáp án đúng'
+    df = pd.read_excel('data.xlsx') 
+    return df.to_dict('records')
 
-df = load_data()
-total_questions = len(df)
+data = load_data()
 
-# Tiêu đề ứng dụng
-st.title("📝 Ứng Dụng Luyện Tập Trắc Nghiệm")
-st.write(f"Tổng số câu hỏi hiện có: **{total_questions}** câu.")
+# 2. Xáo trộn câu hỏi và lưu vào session_state để cố định vị trí trong suốt lượt chơi
+if 'shuffled_questions' not in st.session_state:
+    # Copy danh sách câu hỏi gốc ra một danh sách mới
+    shuffled = data.copy()
+    # Trộn ngẫu nhiên danh sách này
+    random.shuffle(shuffled)
+    # Lưu vào bộ nhớ tạm của Streamlit
+    st.session_state.shuffled_questions = shuffled
+    st.session_state.current_index = 0  # Chỉ số câu hỏi hiện tại
+    st.session_state.score = 0          # Điểm số ban đầu
 
-# 2. Quản lý trạng thái câu hỏi bằng Session State của Streamlit
-if "current_index" not in st.session_state:
-    st.session_state.current_index = 0
-if "score" not in st.session_state:
-    st.session_state.score = 0
-if "answered" not in st.session_state:
-    st.session_state.answered = False
+# 3. Lấy danh sách câu hỏi đã được trộn ra để sử dụng
+questions = st.session_state.shuffled_questions
+current_idx = st.session_state.current_index
 
-idx = st.session_state.current_index
-
-# Giao diện hiển thị khi chưa hết câu hỏi
-if idx < total_questions:
-    row = df.iloc[idx]
+# --- Phần hiển thị giao diện trắc nghiệm ---
+if current_idx < len(questions):
+    item = questions[current_idx]
     
-    st.subheader(f"Câu hỏi {idx + 1}/{total_questions}:")
-    st.info(row["Câu hỏi"])
+    st.write(f"### Câu hỏi {current_idx + 1}: {item['Câu hỏi']}")
     
-    # Chuẩn bị danh sách lựa chọn
-    options = []
-    if row["A"]: options.append(f"A. {row['A']}")
-    if row["B"]: options.append(f"B. {row['B']}")
-    if row["C"]: options.append(f"C. {row['C']}")
-    if row["D"]: options.append(f"D. {row['D']}")
+    # Tạo danh sách các lựa chọn
+    options = [item['A'], item['B'], item['C'], item['D']]
     
-    # Ô chọn đáp án
-    user_choice = st.radio("Chọn đáp án của bạn:", options, key=f"q_{idx}", index=None)
+    # Hiển thị các nút bấm chọn đáp án
+    choice = st.radio("Chọn câu trả lời đúng:", options, key=f"q_{current_idx}")
     
-    # Nút bấm nộp bài kiểm tra đáp án
-    if st.button("Nộp câu trả lời", disabled=st.session_state.answered or user_choice is None):
-        st.session_state.answered = True
-        correct_ans_letter = str(row["Đáp án đúng"]).strip().upper()
-        user_ans_letter = user_choice[0] # Lấy ký tự đầu (A, B, C, hoặc D)
-        
-        if user_ans_letter == correct_ans_letter:
-            st.success("🎉 Chính xác!")
+    if st.button("Nộp bài"):
+        if choice == item['Đáp án đúng']:
+            st.success("Chính xác! 🎉")
             st.session_state.score += 1
         else:
-            st.error(f"❌ Sai rồi! Đáp án đúng là: {correct_ans_letter}")
+            st.error(f"Sai rồi! Đáp án đúng là: {item['Đáp án đúng']}")
             
-    # Nút bấm chuyển sang câu tiếp theo
-    if st.session_state.answered:
-        if st.button("Câu tiếp theo ➡️"):
+        # Bấm để qua câu tiếp theo
+        if st.button("Câu tiếp theo"):
             st.session_state.current_index += 1
-            st.session_state.answered = False
             st.rerun()
-
-# Giao diện hiển thị khi đã hoàn thành hết bộ câu hỏi
 else:
-    st.balloons()
-    st.success(f"🏆 Bạn đã hoàn thành tất cả câu hỏi!")
-    st.metric(label="Điểm số của bạn", value=f"{st.session_state.score} / {total_questions}")
+    st.write("## Chúc mừng bạn đã hoàn thành bài trắc nghiệm! 🎉")
+    st.write(f"Số điểm của bạn là: **{st.session_state.score} / {len(questions)}**")
     
-    if st.button("Làm lại từ đầu 🔄"):
-        st.session_state.current_index = 0
-        st.session_state.score = 0
-        st.session_state.answered = False
+    if st.button("Làm lại từ đầu (Trộn lượt mới)"):
+        # Xóa bộ nhớ tạm để lượt sau tự động trộn lại theo thứ tự khác
+        del st.session_state.shuffled_questions
         st.rerun()
