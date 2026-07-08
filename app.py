@@ -6,7 +6,7 @@ import random
 @st.cache_data
 def load_data():
     # Giả sử file của bạn có cột 'Câu hỏi', 'A', 'B', 'C', 'D', 'Đáp án đúng'
-    df = pd.read_excel('data.xlsx') 
+    df = pd.read_excel('ngan_hang_cau_hoi_hoan_thinh.xlsx') 
     return df.to_dict('records')
 
 data = load_data()
