@@ -52,7 +52,7 @@ if 'shuffled_questions' not in st.session_state and len(data) > 0:
     reset_quiz()
 
 # --- GIAO DIỆN CHÍNH ---
-st.title("🎯 Ứng Dụng Trắc Nghiệm Tiếng Anh")
+st.title("🎯 Ứng Dụng Trắc Nghiệm Lòng Yêu Nước")
 
 if len(data) == 0:
     st.warning("Dữ liệu câu hỏi trống. Vui lòng kiểm tra lại file Excel.")
